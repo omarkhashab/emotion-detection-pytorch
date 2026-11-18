@@ -2,6 +2,16 @@
 
 Classify English text into six emotions (**sadness, joy, love, anger, fear, surprise**) using
 `distilbert-base-uncased`, a hand-written PyTorch training loop, and a local Streamlit app.
+
+> **Results at a glance** (test set, 2,000 texts, from `results/comparison.csv`)
+> - **Partial fine-tuning (B) wins:** Macro F1 **0.830**, accuracy **0.884**. The frozen-backbone baseline (A)
+>   reaches Macro F1 0.307, accuracy 0.546.
+> - **Cheap to get:** B trains 14.8M parameters (22% of the model) in **3.7 min** on a laptop GTX 1650 Ti,
+>   versus 2.4 min for A.
+> - **Main weaknesses:** love is often predicted as joy (28% of love texts), and surprise, the rarest class, has
+>   the lowest F1 (0.70). Many of the most confident "errors" turn out to be noisy labels ([§7](#7-error-analysis)).
+> - **Working demo:** `streamlit run app.py` shows the predicted emotion with all six probabilities ([§8](#8-streamlit-app)).
+
 The project compares two strategies:
 
 | | Experiment A — Feature extraction | Experiment B — Partial fine-tuning |

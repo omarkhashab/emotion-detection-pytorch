@@ -1,15 +1,19 @@
+# Exact versions used to produce every result in this repo (Python 3.13, Windows 10, CUDA 12.6).
+# Install the CUDA build of PyTorch first (see README "Setup"), then: pip install -r requirements.txt
+# `torch==2.14.1` is satisfied by the CUDA wheel 2.14.1+cu126 as well as by the CPU wheel.
+
 # Core deep learning
-torch>=2.2
-transformers>=4.44
-datasets>=2.20
+torch==2.14.1
+transformers==5.23.0
+datasets==5.2.0
 
 # Metrics, data handling and plots
-scikit-learn>=1.4
-numpy>=1.26
-pandas>=2.1
-matplotlib>=3.8
-tqdm>=4.66
+scikit-learn==1.9.1
+numpy==2.5.5
+pandas==3.1.1
+matplotlib==3.11.2
+tqdm==4.70.1
 
 # User interface
-streamlit>=1.38
-altair>=5.0
+streamlit==1.67.0
+altair==6.3.0

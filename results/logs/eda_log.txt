@@ -1,19 +1,9 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-C:\Users\user\emotion-detection-pytorch\.venv\Lib\site-packages\huggingface_hub\file_download.py:149: UserWarning: `huggingface_hub` cache-system uses symlinks by default to efficiently store duplicated files but your machine does not support them in C:\Users\user\.cache\huggingface\hub\datasets--dair-ai--emotion. Caching files will still work but in a degraded version that might require more space on your disk. This warning can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable. For more details, see https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.
-To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
-  warnings.warn(message)
-C:\Users\user\emotion-detection-pytorch\.venv\Lib\site-packages\huggingface_hub\file_download.py:149: UserWarning: `huggingface_hub` cache-system uses symlinks by default to efficiently store duplicated files but your machine does not support them in C:\Users\user\.cache\huggingface\hub. Caching files will still work but in a degraded version that might require more space on your disk. This warning can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable. For more details, see https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.
-To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
-  warnings.warn(message)
-Generating train split:   0%|          | 0/16000 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 16000/16000 [00:00<00:00, 183377.59 examples/s]
-Generating validation split:   0%|          | 0/2000 [00:00<?, ? examples/s]Generating validation split: 100%|██████████| 2000/2000 [00:00<00:00, 167327.07 examples/s]
-Generating test split:   0%|          | 0/2000 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 2000/2000 [00:00<00:00, 207505.27 examples/s]
-
+# eda_log.txt: console output of the run, with progress bars and environment warnings removed.
+# Note: this run predates the results/ reorganisation - the files it saved now live in results/eda/.
 ======================================================================
 1. Splits, columns and label names
 ======================================================================
 DatasetDict({
-    train: Dataset({
         features: ['text', 'label'],
         num_rows: 16000
     })
@@ -28,7 +18,6 @@ DatasetDict({
 })
 Label names from the dataset card: ['sadness', 'joy', 'love', 'anger', 'fear', 'surprise']
 OK - matches our LABELS mapping: {0: 'sadness', 1: 'joy', 2: 'love', 3: 'anger', 4: 'fear', 5: 'surprise'}
-
 ======================================================================
 2. Sample text-label pairs (2 per emotion, train split)
 ======================================================================
@@ -45,7 +34,6 @@ OK - matches our LABELS mapping: {0: 'sadness', 1: 'joy', 2: 'love', 3: 'anger',
  sadness                                                                                                                                                                                                             im not sure why today i feel so horrible
 surprise                                                                                                                                                                  i notice i jump when i feel anything in my hair which i cant say im surprised about
 surprise i also feel curious when i read all the readings because not only i want to have depth understanding of social constructivism itself but also i found this unit gives opportunity for me to understand the philosophy of each type of constructivism
-
 ======================================================================
 3. Null / empty texts and duplicates
 ======================================================================
@@ -53,9 +41,7 @@ surprise i also feel curious when i read all the readings because not only i wan
 train       16000          0           0              31                                       30
 validation   2000          0           0               2                                        2
 test         2000          0           0               0                                        0
-
 Texts that also appear in train (possible leakage): {'validation': 5, 'test': 11}
-
 ======================================================================
 4. Text length (words and tokens)
 ======================================================================
@@ -68,14 +54,9 @@ min          2.0
 50%         17.0
 75%         25.0
 max         66.0
-C:\Users\user\emotion-detection-pytorch\.venv\Lib\site-packages\huggingface_hub\file_download.py:149: UserWarning: `huggingface_hub` cache-system uses symlinks by default to efficiently store duplicated files but your machine does not support them in C:\Users\user\.cache\huggingface\hub\models--distilbert-base-uncased. Caching files will still work but in a degraded version that might require more space on your disk. This warning can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable. For more details, see https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.
-To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
-  warnings.warn(message)
-
 Tokens per text (train): mean 22.3, 95th pct 45, max 87
 Texts longer than MAX_LENGTH=128: 0 (0.00%)
-Saved figure -> C:\Users\user\emotion-detection-pytorch\results\token_length_distribution.png
-
+Saved figure -> results\token_length_distribution.png
 ======================================================================
 5. Label balance
 ======================================================================
@@ -86,9 +67,7 @@ love       1304         178   159      8.2
 anger      2159         275   275     13.5
 fear       1937         212   224     12.1
 surprise    572          81    66      3.6
-
 Imbalance ratio (largest / smallest class, train): 9.4x
-Saved figure -> C:\Users\user\emotion-detection-pytorch\results\class_distribution.png
-
-Saved summary -> C:\Users\user\emotion-detection-pytorch\results\eda_summary.json
+Saved figure -> results\class_distribution.png
+Saved summary -> results\eda_summary.json
 EDA exit code: 0

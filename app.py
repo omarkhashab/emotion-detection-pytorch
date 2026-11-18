@@ -31,6 +31,7 @@ EXAMPLES = [
     "I was shocked to see my whole family waiting at the airport.",
 ]
 HIGHLIGHT, MUTED_BAR = "#2a78d6", "#b7d3f6"  # predicted class vs. the others
+LABEL_TEXT = "#9a9993"                       # value labels: readable on light and dark backgrounds
 
 st.set_page_config(page_title="EmotionSense", page_icon="🎭", layout="centered")
 
@@ -60,13 +61,20 @@ def probability_chart(result: Prediction) -> alt.Chart:
     is_top = alt.datum.emotion == result.label.capitalize()
     base = alt.Chart(df).encode(
         y=alt.Y("emotion:N", sort="-x", title=None),
-        x=alt.X("probability:Q", title="Probability", scale=alt.Scale(domain=[0, 1]), axis=alt.Axis(format="%")),
+        # Domain runs a bit past 100% so the value label of a ~100% bar is not clipped.
+        x=alt.X(
+            "probability:Q",
+            title="Probability",
+            scale=alt.Scale(domain=[0, 1.12]),
+            axis=alt.Axis(format="%", values=[0, 0.2, 0.4, 0.6, 0.8, 1.0]),
+        ),
         tooltip=[alt.Tooltip("emotion:N", title="Emotion"), alt.Tooltip("probability:Q", title="Probability", format=".2%")],
     )
     bars = base.mark_bar(cornerRadiusEnd=4, height=18).encode(
         color=alt.condition(is_top, alt.value(HIGHLIGHT), alt.value(MUTED_BAR))
     )
-    labels = base.mark_text(align="left", dx=4).encode(text=alt.Text("probability:Q", format=".1%"))
+    # Mid-grey label text stays readable on both Streamlit's light and dark themes.
+    labels = base.mark_text(align="left", dx=4, color=LABEL_TEXT).encode(text=alt.Text("probability:Q", format=".1%"))
     return (bars + labels).properties(height=230)
 
 
