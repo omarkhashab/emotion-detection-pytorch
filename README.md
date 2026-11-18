@@ -68,41 +68,24 @@ emotion-detection-pytorch/
 └── README.md
 ```
 
-**Import graph** (arrows = "imports"): `config` is at the bottom; nothing imports `train` or `app`.
-
-```
-app.py ──► predict ──► config
-train  ──► dataset, model, evaluate ──► config
-evaluate ─► dataset, visualize
-eda    ──► dataset, visualize
-```
-
 ## 3. Setup
 
-**Requirements:** Python 3.10+; an NVIDIA GPU is recommended (Google Colab's free T4 works well).
-Training on CPU works but is slow, since every batch still runs through the full 66M-parameter network.
+Requires Python 3.10+. An NVIDIA GPU is recommended; training on the CPU works but is slow. From the repository
+root, install the CUDA build of PyTorch first, then everything else (on macOS/Linux, activate the environment
+with `source .venv/bin/activate`):
 
 ```bash
-# from the repository root
 python -m venv .venv
-# Windows: .venv\Scripts\activate      macOS/Linux: source .venv/bin/activate
+.venv\Scripts\activate
+pip install torch --index-url https://download.pytorch.org/whl/cu126
 pip install -r requirements.txt
 ```
 
-> For CUDA on Windows/Linux, install the matching PyTorch wheel first, following the selector at
-> https://pytorch.org/get-started/locally/, and then run `pip install -r requirements.txt`.
+For other CUDA versions, or CPU only, pick the matching command at https://pytorch.org/get-started/locally/.
 
-**Running on Google Colab:** upload or clone the repo, set *Runtime → Change runtime type → GPU*, then:
-
-```python
-%cd emotion-detection-pytorch
-!pip install -q -r requirements.txt
-!python -m src.eda
-!python -m src.train
-!python -m src.evaluate
-```
-
-Download `results/` and `saved_model/` afterwards to run the app locally.
+> **GPU gotcha:** CUDA 12.x wheels need an NVIDIA driver ≥ 528. With an older driver,
+> `torch.cuda.is_available()` returns `False` and everything silently runs on the CPU. Check with
+> `python -c "import torch; print(torch.cuda.is_available())"` before training.
 
 **Tested environment** (the configuration that produced every result in this README):
 
@@ -117,19 +100,6 @@ Download `results/` and `saved_model/` afterwards to run the app locally.
 | pandas / numpy / matplotlib | 3.1.1 / 2.5.5 / 3.11.2 |
 | streamlit / altair | 1.67.0 / 6.3.0 |
 | Hardware | NVIDIA GeForce GTX 1650 Ti laptop GPU (4 GB), driver 621.24 |
-
-The exact install commands used on this machine (CUDA 12.6 build of PyTorch first, then everything else):
-
-```bash
-py -3.13 -m venv .venv
-.venv\Scripts\activate
-pip install torch --index-url https://download.pytorch.org/whl/cu126
-pip install -r requirements.txt
-```
-
-> **GPU gotcha:** CUDA 12.x wheels need an NVIDIA driver ≥ 528. With an older driver,
-> `torch.cuda.is_available()` returns `False` and everything silently runs on the CPU. Check with
-> `python -c "import torch; print(torch.cuda.is_available())"` before training.
 
 ## 4. How to run (in order)
 
@@ -150,43 +120,22 @@ python -m src.train --epochs 1         # quick smoke test of the whole pipeline
 
 Always run commands from the repository root with `python -m ...`, so that `from src...` imports resolve.
 
-## 5. What each stage does
+## 5. Key design choices
 
-### 5.1 Data and EDA — `src/eda.py`
-Loads the predefined `split` configuration (16,000 / 2,000 / 2,000) and **never merges the splits**.
-It checks columns and confirms that the label names match our mapping (`0 sadness, 1 joy, 2 love, 3 anger,
-4 fear, 5 surprise`). It also checks for null/empty texts, duplicates, label conflicts, train↔test overlap,
-token lengths (which justify `max_length=128`), and class balance. The class balance motivates **Macro F1**
-as the selection metric, because plain accuracy hides weak performance on rare classes like *surprise*.
+- **Data (`src/dataset.py`):** the predefined 16k / 2k / 2k splits are never merged. Each split is tokenized once
+  (truncation + attention mask), and batches are padded dynamically.
+- **Model (`src/model.py`):** each experiment builds a fresh pretrained DistilBERT with a new 6-class head, so
+  **B never starts from A's checkpoint**. Layers are frozen with `requires_grad = False`.
+- **Training (`src/train.py`):** a plain PyTorch loop with no HF `Trainer`: forward → loss →
+  `zero_grad()` → `backward()` → `step()`. Validation runs under `model.eval()` + `torch.no_grad()`, and
+  a checkpoint is saved **only when validation Macro F1 improves**. The test split is never loaded here.
+- **Evaluation (`src/evaluate.py`):** scores each best checkpoint on the **test set once**, and exports the
+  best-by-validation model to `saved_model/`.
+- **Inference (`src/predict.py`, `app.py`):** one reusable `EmotionClassifier.predict(text)`. It rejects blank
+  input, and its output is the same on CPU and GPU. The Streamlit app reuses it and caches it with
+  `st.cache_resource`.
 
-### 5.2 Tokenization and DataLoader — `src/dataset.py`
-`EmotionDataset` tokenizes each split once, with truncation and an attention mask.
-`DataCollatorWithPadding` pads **per batch** to the longest sentence in that batch (dynamic padding), which
-is much faster than padding everything to 128. Only the training loader shuffles, and it uses a seeded generator.
-
-### 5.3 Model and freezing — `src/model.py`
-`AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=6)` adds a
-**randomly initialized** head (`pre_classifier` → `classifier`). Freezing is done by setting
-`requires_grad = False` on the backbone parameters. Each experiment calls `build_model()` separately, so
-**B starts from pretrained weights, not from A's checkpoint**.
-
-### 5.4 Training loop — `src/train.py`
-This is a pure PyTorch loop (no HF `Trainer`): `model.train()` → forward → `CrossEntropyLoss` →
-`optimizer.zero_grad()` → `loss.backward()` → gradient clipping → `optimizer.step()` → LR scheduler step.
-After each epoch, validation runs under `model.eval()` + `torch.no_grad()`. The checkpoint is saved
-**only when validation Macro F1 improves**. The run also logs training loss, validation loss/accuracy/Macro F1,
-epoch time, total time, and trainable parameter counts.
-
-### 5.5 Evaluation — `src/evaluate.py`
-This step loads each experiment's best checkpoint and scores the **test set once**. It writes the comparison
-table, per-class reports, the confusion matrix and learning curves, and a CSV of misclassified examples
-(most confident mistakes first). The experiment with the best **validation** Macro F1 is copied to `saved_model/`.
-
-### 5.6 Inference and UI — `src/predict.py`, `app.py`
-`EmotionClassifier.predict(text)` returns a `Prediction(label, confidence, probabilities)`. Blank input raises
-a clear `ValueError`. Outputs are moved to CPU Python floats, so results look the same on CPU and GPU.
-The Streamlit app caches the classifier with `st.cache_resource`, rejects empty input, shows a spinner and
-any errors, and plots all six probabilities. It also offers five clickable example sentences.
+For a step-by-step explanation of every stage, see [docs/LEARNING_GUIDE.md](docs/LEARNING_GUIDE.md).
 
 ---
 
@@ -229,10 +178,6 @@ Per-class test F1 (from `results/evaluation/classification_report_*.txt`):
 |---|---|---|---|---|---|
 | A: Feature extraction | 595,206 (0.89 %) | 66,958,086 | 144.6 s (2.4 min) | 3 | 0.3301 |
 | B: Partial fine-tuning | 14,770,950 (22.06 %) | 66,958,086 | 224.1 s (3.7 min) | 2 | 0.8696 |
-
-B trains **~25× more parameters** but takes only **~1.55× longer** (≈23 vs ≈14.5 batches/s on the GTX 1650 Ti):
-the forward pass through all 6 blocks is paid by both experiments, and B only adds the backward pass through
-2 blocks plus optimizer state for 14.2M extra weights.
 
 ### 6.2b Per-epoch validation history
 
@@ -327,8 +272,9 @@ three reasons:
   the frequent classes. A predicts joy and sadness for most inputs: surprise recall is **0.00** and love recall
   **0.01**. That is why A's accuracy (0.55) looks much better than its Macro F1 (0.31). Macro F1 exposes this.
 
-The cost of B is modest: 25× more trainable parameters but only ~1.55× the training time (3.7 vs 2.4 min).
-So partial fine-tuning is clearly worth it here.
+The cost of B is modest: 25× more trainable parameters but only ~1.55× the training time (3.7 vs 2.4 min),
+because both experiments pay for the forward pass through all 6 blocks, and B only adds the backward pass
+through 2 blocks. So partial fine-tuning is clearly worth it here.
 
 **4. Which emotions are most often confused, and what do the mistakes reveal?**
 From B's test confusion matrix (rows = true class):
