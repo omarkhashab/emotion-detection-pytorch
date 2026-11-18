@@ -364,13 +364,14 @@ From B's test confusion matrix (rows = true class):
 
 ## 10. Model weights
 
-The weights (~255 MB per checkpoint) are **not committed** to git (see `.gitignore`). To get them, choose one:
+This is a trial/course project, so the trained weights (~255 MB per checkpoint) are **not distributed**.
+They are excluded from git (see `.gitignore`) and are not hosted anywhere else.
 
-1. **Reproduce:** run steps 2–3 above. The seeds are fixed, so results should be very close, though GPU
-   kernels are not bit-for-bit deterministic.
-2. **Download:** _TODO — after training, upload `saved_model/` to the Hugging Face Hub
-   (`huggingface-cli upload <user>/emotionsense-distilbert saved_model .`) or attach it as a zipped GitHub
-   Release asset, and put the link here. Then unzip it into `saved_model/`._
+To get a working model, **reproduce it**: run steps 2–3 of [How to run](#4-how-to-run-in-order)
+(`python -m src.train`, then `python -m src.evaluate`). This takes about 6 minutes on a GTX 1650 Ti and writes
+`checkpoints/` and `saved_model/`, after which `python -m src.predict` and `streamlit run app.py` work. The seeds
+are fixed, so your metrics should be very close to the ones above, though GPU kernels are not bit-for-bit
+deterministic.
 
 ## 11. References
 
