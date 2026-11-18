@@ -1,0 +1,62 @@
+{
+  "quality": {
+    "train": {
+      "rows": 16000,
+      "null_text": 0,
+      "empty_text": 0,
+      "duplicate_rows": 31,
+      "duplicate_texts_with_conflicting_labels": 30
+    },
+    "validation": {
+      "rows": 2000,
+      "null_text": 0,
+      "empty_text": 0,
+      "duplicate_rows": 2,
+      "duplicate_texts_with_conflicting_labels": 2
+    },
+    "test": {
+      "rows": 2000,
+      "null_text": 0,
+      "empty_text": 0,
+      "duplicate_rows": 0,
+      "duplicate_texts_with_conflicting_labels": 0
+    }
+  },
+  "overlap_with_train": {
+    "validation": 5,
+    "test": 11
+  },
+  "tokens": {
+    "mean": 22.2595,
+    "p95": 45.0,
+    "max": 87,
+    "truncated_at_max_length": 0
+  },
+  "label_counts": {
+    "train": {
+      "sadness": 4666,
+      "joy": 5362,
+      "love": 1304,
+      "anger": 2159,
+      "fear": 1937,
+      "surprise": 572
+    },
+    "validation": {
+      "sadness": 550,
+      "joy": 704,
+      "love": 178,
+      "anger": 275,
+      "fear": 212,
+      "surprise": 81
+    },
+    "test": {
+      "sadness": 581,
+      "joy": 695,
+      "love": 159,
+      "anger": 275,
+      "fear": 224,
+      "surprise": 66
+    }
+  },
+  "imbalance_ratio_train": 9.37
+}

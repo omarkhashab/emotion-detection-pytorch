@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Model weights (~255 MB each) - see "Model weights" in README.md
+checkpoints/
+saved_model/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Streamlit server log prints local/public IP addresses - keep it out of the public repo
+results/logs/streamlit_log.txt
+
+# Claude Code local settings
+.claude/

@@ -1,0 +1,38 @@
+{
+  "experiment": "B_partial_finetuning",
+  "description": "Last 2 Transformer layers + classification head trainable",
+  "learning_rate": 2e-05,
+  "batch_size": 16,
+  "device": "cuda",
+  "trainable_params": 14770950,
+  "total_params": 66958086,
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 0.7908792164772749,
+      "val_loss": 0.40597776675224306,
+      "val_accuracy": 0.857,
+      "val_macro_f1": 0.824106081524839,
+      "epoch_seconds": 74.40260109999997
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.3808702665939927,
+      "val_loss": 0.31513039776682855,
+      "val_accuracy": 0.8975,
+      "val_macro_f1": 0.8696482065026592,
+      "epoch_seconds": 74.4657052
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.2877616746723652,
+      "val_loss": 0.2951356874257326,
+      "val_accuracy": 0.897,
+      "val_macro_f1": 0.8651399084944836,
+      "epoch_seconds": 74.6815206
+    }
+  ],
+  "best_epoch": 2,
+  "best_val_macro_f1": 0.8696482065026592,
+  "train_seconds": 224.14002829999993
+}

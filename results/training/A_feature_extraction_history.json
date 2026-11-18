@@ -1,0 +1,38 @@
+{
+  "experiment": "A_feature_extraction",
+  "description": "Frozen DistilBERT backbone, trainable classification head",
+  "learning_rate": 0.0001,
+  "batch_size": 16,
+  "device": "cuda",
+  "trainable_params": 595206,
+  "total_params": 66958086,
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 1.396859436571598,
+      "val_loss": 1.2826240730285645,
+      "val_accuracy": 0.52,
+      "val_macro_f1": 0.2229582361199487,
+      "epoch_seconds": 47.97370850000004
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.2680008999705314,
+      "val_loss": 1.2329645237922668,
+      "val_accuracy": 0.5495,
+      "val_macro_f1": 0.2979409516803751,
+      "epoch_seconds": 47.88271210000005
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.230136135518551,
+      "val_loss": 1.2164708518981933,
+      "val_accuracy": 0.5615,
+      "val_macro_f1": 0.33005589089438664,
+      "epoch_seconds": 47.89499779999994
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_macro_f1": 0.33005589089438664,
+  "train_seconds": 144.5507351
+}
